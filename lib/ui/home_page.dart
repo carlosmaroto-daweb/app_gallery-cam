@@ -42,6 +42,11 @@ class _HomePage extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    Timer(const Duration(seconds: 30), () {
+      setState(() {
+        finishedLoad = true;
+      });
+    });
     listImages.add(
         "https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
     listImages.add(
@@ -166,53 +171,49 @@ class _HomePage extends State<HomePage> {
   }
 
   Widget loadingGallery(BuildContext context) {
-    Widget result;
-    if (finishedLoad) {
-      result = Padding(
-        padding: EdgeInsets.only(top: returnResponsiveHeight(context, 0.05)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: returnResponsiveWidth(context, 0.9),
-              height: returnResponsiveHeight(context, 0.9),
-              child: ListView.builder(
-                itemCount: listImages.length,
-                itemBuilder: ((context, index) {
-                  return Card(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      margin: const EdgeInsets.all(15),
-                      elevation: 10,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Column(
-                          children: <Widget>[
-                            FadeInImage(
-                              image: NetworkImage(listImages[index]),
-                              placeholder:
-                                  const AssetImage('assets/loading.gif'),
-                              fit: BoxFit.cover,
-                              height: 260,
+    return finishedLoad
+        ? Padding(
+            padding:
+                EdgeInsets.only(top: returnResponsiveHeight(context, 0.05)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: returnResponsiveWidth(context, 0.9),
+                  height: returnResponsiveHeight(context, 0.9),
+                  child: ListView.builder(
+                    itemCount: listImages.length,
+                    itemBuilder: ((context, index) {
+                      return Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          margin: const EdgeInsets.all(15),
+                          elevation: 10,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: Column(
+                              children: <Widget>[
+                                FadeInImage(
+                                  image: NetworkImage(listImages[index]),
+                                  placeholder:
+                                      const AssetImage('assets/loading.gif'),
+                                  fit: BoxFit.cover,
+                                  height: 260,
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(listImages[index]),
+                                )
+                              ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              child: Text(listImages[index]),
-                            )
-                          ],
-                        ),
-                      ));
-                }),
-              ),
-            )
-          ],
-        ),
-      );
-    } else {
-      result = const Center(child: CircularProgressIndicator());
-      setTimeOut(context, 30);
-    }
-    return result;
+                          ));
+                    }),
+                  ),
+                )
+              ],
+            ),
+          )
+        : const Center(child: CircularProgressIndicator());
   }
 
   Widget getImage() {
@@ -249,15 +250,6 @@ class _HomePage extends State<HomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-    });
-  }
-
-  void setTimeOut(BuildContext context, int time) {
-    Timer(Duration(seconds: time), () {
-      finishedLoad = true;
-      setState(() {
-        loadingGallery(context);
-      });
     });
   }
 }
