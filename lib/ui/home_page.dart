@@ -20,6 +20,7 @@ class _HomePage extends State<HomePage> {
   List<String> listImages = [];
   bool _pickImage = false;
   int _selectedIndex = 0;
+  bool finishedLoad = false;
 
   double returnResponsiveWidth(context, double originalPercentValue) {
     return MediaQuery.of(context).size.width * originalPercentValue;
@@ -166,46 +167,51 @@ class _HomePage extends State<HomePage> {
 
   Widget loadingGallery(BuildContext context) {
     Widget result;
-    Timer(const Duration(seconds: 5), () => result = );
-    result = Padding(
-      padding: EdgeInsets.only(top: returnResponsiveHeight(context, 0.05)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: returnResponsiveWidth(context, 0.9),
-            height: returnResponsiveHeight(context, 0.9),
-            child: ListView.builder(
-              itemCount: listImages.length,
-              itemBuilder: ((context, index) {
-                return Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                    margin: const EdgeInsets.all(15),
-                    elevation: 10,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
-                      child: Column(
-                        children: <Widget>[
-                          FadeInImage(
-                            image: NetworkImage(listImages[index]),
-                            placeholder: const AssetImage('assets/loading.gif'),
-                            fit: BoxFit.cover,
-                            height: 260,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            child: Text(listImages[index]),
-                          )
-                        ],
-                      ),
-                    ));
-              }),
-            ),
-          )
-        ],
-      ),
-    );
+    if (finishedLoad) {
+      result = Padding(
+        padding: EdgeInsets.only(top: returnResponsiveHeight(context, 0.05)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: returnResponsiveWidth(context, 0.9),
+              height: returnResponsiveHeight(context, 0.9),
+              child: ListView.builder(
+                itemCount: listImages.length,
+                itemBuilder: ((context, index) {
+                  return Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      margin: const EdgeInsets.all(15),
+                      elevation: 10,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Column(
+                          children: <Widget>[
+                            FadeInImage(
+                              image: NetworkImage(listImages[index]),
+                              placeholder:
+                                  const AssetImage('assets/loading.gif'),
+                              fit: BoxFit.cover,
+                              height: 260,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Text(listImages[index]),
+                            )
+                          ],
+                        ),
+                      ));
+                }),
+              ),
+            )
+          ],
+        ),
+      );
+    } else {
+      result = const Center(child: CircularProgressIndicator());
+      setTimeOut(context, 30);
+    }
     return result;
   }
 
@@ -243,6 +249,15 @@ class _HomePage extends State<HomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  void setTimeOut(BuildContext context, int time) {
+    Timer(Duration(seconds: time), () {
+      finishedLoad = true;
+      setState(() {
+        loadingGallery(context);
+      });
     });
   }
 }
