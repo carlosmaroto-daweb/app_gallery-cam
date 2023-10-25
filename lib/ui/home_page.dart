@@ -1,22 +1,19 @@
 // ignore_for_file: library_private_types_in_public_api
 import 'dart:async';
 import 'dart:io';
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:myapp/ui/take_picture.dart';
 
 // ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  String imagePath;
-  HomePage({super.key, required this.imagePath});
+  const HomePage({super.key});
 
   @override
   _HomePage createState() => _HomePage();
 }
 
 class _HomePage extends State<HomePage> {
+  String imagePath = '';
   List<String> listImages = [];
   bool _pickImage = false;
   int _selectedIndex = 0;
@@ -28,15 +25,6 @@ class _HomePage extends State<HomePage> {
 
   double returnResponsiveHeight(context, double originalPercentValue) {
     return MediaQuery.of(context).size.height * originalPercentValue;
-  }
-
-  void handleNavigateTapToTakePicture(BuildContext context) async {
-    WidgetsFlutterBinding.ensureInitialized();
-    final cameras = await availableCameras();
-    final firstCamera = cameras.first;
-    // ignore: use_build_context_synchronously
-    Navigator.of(context).push(
-        CupertinoPageRoute(builder: (_) => TakePicture(camera: firstCamera)));
   }
 
   @override
@@ -69,7 +57,21 @@ class _HomePage extends State<HomePage> {
     }
 
     setState(() {
-      widget.imagePath = newImagePath;
+      imagePath = newImagePath;
+    });
+  }
+
+  Future takePicture() async {
+    final takePicture =
+        await ImagePicker().pickImage(source: ImageSource.camera);
+    var newImagePath = '';
+    if (takePicture != null) {
+      newImagePath = File(takePicture.path).path;
+      _pickImage = false;
+    }
+
+    setState(() {
+      imagePath = newImagePath;
     });
   }
 
@@ -107,7 +109,7 @@ class _HomePage extends State<HomePage> {
                   label: const Text('Abrir cámara',
                       style: TextStyle(fontSize: 30)),
                   onPressed: () {
-                    handleNavigateTapToTakePicture(context);
+                    takePicture();
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -218,13 +220,13 @@ class _HomePage extends State<HomePage> {
 
   Widget getImage() {
     Widget result;
-    if (widget.imagePath == '') {
+    if (imagePath == '') {
       result = const Text('Selecciona una imagen',
           textAlign: TextAlign.center,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30));
     } else {
       result = Image.file(
-        File(widget.imagePath),
+        File(imagePath),
         height: returnResponsiveHeight(context, 0.4),
       );
     }
@@ -232,11 +234,10 @@ class _HomePage extends State<HomePage> {
   }
 
   Widget getName() {
-    String path = widget.imagePath;
     if (_pickImage) {
       return Padding(
         padding: EdgeInsets.only(top: returnResponsiveHeight(context, 0.02)),
-        child: Text(path.split('/')[path.split('/').length - 1],
+        child: Text(imagePath.split('/')[imagePath.split('/').length - 1],
             textAlign: TextAlign.center,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
       );

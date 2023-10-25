@@ -10,9 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'MyApp Flutter',
-      home: HomePage(imagePath: ''),
+      home: HomePage(),
     );
   }
 }
